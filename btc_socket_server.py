@@ -13,6 +13,8 @@ MY_IP='172.31.16.27'
 #Manage mutiple outbound connections
 class SocketServerManager:
     def __init__(self, host, port):
+        self.host=host
+        self.port=port
         self.inbound_connections = set([])
         self.socket = socket.socket()
         self.socket.bind((host, port))
@@ -37,25 +39,26 @@ class SocketServerManager:
                 break;
             msg = MsgSerializable().from_bytes(dataReceived)
             print('received ',msg)
-        if isinstance(msg,msg_version):
-            clientsocket.send(msg_verack().to_bytes())
-            self.inbound_connections.add(addr[0])
-            print('sent verack')
-            clientsocket.send( messages.version_pkt(MY_IP, addr[0]).to_bytes() )
-            print('sent version_pkt')
-        if isinstance(msg,msg_getaddr):
-            perrAddrs = []
-            for peer in self.inbound_connections:
-                perrAddr = CAddress()
-                perrAddr.port=PORT
-                perrAddr.nTime = int(time.time())
-                perrAddr.ip = peer
-                perrAddrs.append(perrAddr)
-            rMsg= msg_addr()
-            rMsg.addrs = perrAddrs
-            print(rMsg)
-            clientsocket.send(rMsg.to_bytes())
-            print('sent msg_addr')
+            print( isinstance(msg,msg_version))
+            if isinstance(msg,msg_version):
+                clientsocket.send(msg_verack().to_bytes())
+                self.inbound_connections.add(addr[0])
+                print('sent verack')
+                clientsocket.send( messages.version_pkt(MY_IP, addr[0],self.port).to_bytes() )
+                print('sent version_pkt')
+            if isinstance(msg,msg_getaddr):
+                perrAddrs = []
+                for peer in self.inbound_connections:
+                    perrAddr = CAddress()
+                    perrAddr.port=self.port
+                    perrAddr.nTime = int(time.time())
+                    perrAddr.ip = peer
+                    perrAddrs.append(perrAddr)
+                rMsg= msg_addr()
+                rMsg.addrs = perrAddrs
+                print(rMsg)
+                clientsocket.send(rMsg.to_bytes())
+                print('sent msg_addr')
                 
             time.sleep(SLEEP_TIME)
         clientsocket.close()
