@@ -15,7 +15,7 @@ try:
     clientManager = SocketClientManager()
     serverManager = SocketServerManager(HOST,PORT)
     
-    threading.Thread(target=serverManager.start)
+    threading.Thread(target=serverManager.start).start()
     
     
     clientManager.connect(DNS_SEED,PORT)
