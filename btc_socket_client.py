@@ -18,7 +18,7 @@ class SocketClientManager:
     def connect(self, destIp, destPort):
         sc = socket.socket()
         sc.connect((destIp,destPort))
-       
+        print("new conn")
         t = threading.Thread(target=self.messageHandler,args=(sc,))
         t.start()
     
@@ -46,7 +46,9 @@ class SocketClientManager:
                 for peer in msg.addrs:
                     if peer.ip not in self.outbound_connections and peer.ip != MY_IP:
                         print('new peer found'+peer.ip)
-                        self.connect(peer.ip, peer.port)
+                        t = threading.Thread(target=self.connect,args=(peer.ip, peer.port))
+                        t.start()
+                        
                     
             time.sleep(SLEEP_TIME)
         sSocket.close()
